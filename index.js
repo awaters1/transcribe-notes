@@ -7,6 +7,7 @@ exports.handler = function (event, context, callback) {
     if ('undefined' === typeof process.env.DEBUG) {
         alexa.appId = 'insert app id here';
     }
+    console.log(event.session);
     alexa.registerHandlers(newSessionHandlers, startTranscribeModeHandlers, startListenModeHandlers, transcribeHandlers, listenHandlers);
     alexa.execute();
 };
@@ -31,6 +32,9 @@ var newSessionHandlers = {
     'AMAZON.CancelIntent': function () {
         this.emit(':tell', "Goodbye!");
     },
+    'TestIntent': function() {
+        this.emit(':tell', "Testing123");
+    },
     'SessionEndedRequest': function () {
         console.log('session ended!');
         this.emit(":tell", "Goodbye!");
@@ -40,7 +44,8 @@ var newSessionHandlers = {
 var startTranscribeModeHandlers = Alexa.CreateStateHandler(states.START_TRANSCRIBE_MODE, {
     'NewSession': function () {
         console.log('Transcribe new session');
-        this.emit('NewSession');
+        this.handler.state = '';
+        this.emitWithState('NewSession');
     },
     'AMAZON.HelpIntent': function () {
         console.log('Help intent');
