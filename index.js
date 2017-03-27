@@ -8,6 +8,8 @@ exports.handler = function (event, context, callback) {
         alexa.appId = 'insert app id here';
     }
     console.log(event.session);
+    console.log('Is session new:' + (event.session['new'] == true));
+    console.log(event.session['new']);
     alexa.registerHandlers(newSessionHandlers, startTranscribeModeHandlers, startListenModeHandlers, transcribeHandlers, listenHandlers);
     alexa.execute();
 };
@@ -21,8 +23,8 @@ var states = {
 
 var newSessionHandlers = {
     'NewSession': function () {
+        console.log(this.event.session);
         this.handler.state = states.START_TRANSCRIBE_MODE;
-        console.log('Current State: ' + this.handler.state);
         this.emit(':ask', 'What do you want to do? Transcribe a note or check for notes?',
             'Transcribe a note or check for notes?');
     },
