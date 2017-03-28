@@ -1,0 +1,32 @@
+{
+    "intents": [
+        {
+            "intent": "TranscribeNoteIntent",
+            "slots": [
+                {
+                    "name": "Name",
+                    "type": "AMAZON.US_FIRST_NAME"
+                },
+                {
+                    "name": "Note",
+                    "type": "AMAZON.Literal"
+                }
+            ]
+        },
+        {
+            "intent": "QuizIntent"
+        },
+        {
+            "intent": "AMAZON.StopIntent"
+        },
+        {
+            "intent": "AMAZON.CancelIntent"
+        },
+        {
+            "intent": "AMAZON.StartOverIntent"
+        },
+        {
+            "intent": "AMAZON.HelpIntent"
+        }
+    ]
+}

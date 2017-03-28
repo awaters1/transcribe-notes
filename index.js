@@ -10,11 +10,13 @@ exports.handler = function (event, context, callback) {
     console.log(event.session);
     console.log('Is session new:' + (event.session['new'] == true));
     console.log(event.session['new']);
+    console.log(typeof(event.session['new']));
     alexa.registerHandlers(newSessionHandlers, startTranscribeModeHandlers, startListenModeHandlers, transcribeHandlers, listenHandlers);
     alexa.execute();
 };
 
 var states = {
+    // TODO: Maybe change this to start mode
     START_TRANSCRIBE_MODE: '_START_TRANSCRIBE_MODE',
     START_LISTEN_MODE: '_START_LISTEN_MODE',
     TRANSCRIBE_MODE: '_TRANSCRIBE_MODE',
@@ -27,6 +29,10 @@ var newSessionHandlers = {
         this.handler.state = states.START_TRANSCRIBE_MODE;
         this.emit(':ask', 'What do you want to do? Transcribe a note or check for notes?',
             'Transcribe a note or check for notes?');
+    },
+    'TranscribeNoteForNameIntent': function() {
+        this.handler.state = states.TRANSCRIBE_MODE;
+        this.emitWithState('TranscribeNoteForNameIntent');
     },
     'AMAZON.StopIntent': function () {
         this.emit(':tell', "Goodbye!");
@@ -49,6 +55,10 @@ var startTranscribeModeHandlers = Alexa.CreateStateHandler(states.START_TRANSCRI
         this.handler.state = '';
         this.emitWithState('NewSession');
     },
+    'TranscribeNoteIntent': function() {
+        this.handler.state = states.TRANSCRIBE_MODE;
+        this.emitWithState('TranscribeNoteIntent');
+    },
     'AMAZON.HelpIntent': function () {
         console.log('Help intent');
         var message = 'I can transcribe notes for members of your family, ' +
@@ -57,7 +67,7 @@ var startTranscribeModeHandlers = Alexa.CreateStateHandler(states.START_TRANSCRI
     },
     'AMAZON.YesIntent': function () {
         this.handler.state = states.TRANSCRIBE_MODE;
-        this.emit(':ask', 'Ok, who is this note for?');
+        this.emitWithState('TranscribeNoteIntent');
     },
     'AMAZON.NoIntent': function () {
         console.log("NOINTENT");
@@ -126,7 +136,16 @@ var transcribeHandlers = Alexa.CreateStateHandler(states.TRANSCRIBE_MODE, {
         this.emitWithState('NewSession');
     },
     'TranscribeNoteIntent': function() {
-
+        var nameSlot = this.event.request.intent.slots.name;
+        var hasName = (nameSlot && nameSlot.value) || (this.attributes.name);
+        if (!hasName) {
+            this.emit(':ask', 'Ok, who is this note for?', 'Who is the note for?');
+        }
+    },
+    'TranscribeNoteForNameIntent': function() {
+        var name = value;
+        this.attributes['name'] = name;
+        this.emit(':ask', 'What is the note for ' + name + '?', 'Tell me the note');
     },
     'AMAZON.HelpIntent': function () {
         this.handler.state = '';
