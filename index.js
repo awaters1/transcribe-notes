@@ -137,10 +137,22 @@ var transcribeHandlers = Alexa.CreateStateHandler(states.TRANSCRIBE_MODE, {
     },
     'TranscribeNoteIntent': function() {
         var nameSlot = this.event.request.intent.slots.name;
-        var hasName = (nameSlot && nameSlot.value) || (this.attributes.name);
+        var hasNameSlot = (nameSlot && nameSlot.value);
+        var hasName = hasNameSlot || (this.attributes.name);
         if (!hasName) {
             this.emit(':ask', 'Ok, who is this note for?', 'Who is the note for?');
+        } else if (hasNameSlot) {
+            this.attributes.name = nameSlot.value;
         }
+        var noteSlot = this.event.request.intent.slots.note;
+        var hasNoteSlot = (noteSlot && noteSlot.value);
+        var hasNote = hasNoteSlot || (this.attributes.note);
+        if (!hasNote) {
+            this.emit(':ask', 'Ok, what note do you want to leave for ' + this.attributes.name + '?', 'What is the note?');
+        } else if (hasNoteSlot) {
+            this.attributes.note = noteSlot.value;
+        }
+        // TODO: Save the note
     },
     'TranscribeNoteForNameIntent': function() {
         var name = value;
