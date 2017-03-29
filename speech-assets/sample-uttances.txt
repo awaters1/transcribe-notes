@@ -1,5 +1,35 @@
+TranscribeNoteIntent transcribe
 TranscribeNoteIntent transcribe a note
 TranscribeNoteIntent transcribe a note for {Name}
 TranscribeNoteIntent transcribe the note {wash the dishes|Note} for {Name}
-TranscribeNoteIntent {Name}
 TranscribeNoteIntent {wash the dishes|Note}
+TranscribeNoteIntent {please take out the trash today|Note}
+TranscribeNoteIntent {prepare new homework assignments|Note}
+TranscribeNoteIntent {feed the dogs|Note}
+TranscribeNoteIntent {clean your room|Note}
+TranscribeNoteIntent {do the dishes|Note}
+CheckNotesIntent check for notes
+CheckNotesIntent check {Name} notes
+CheckNotesIntent check notes
+CheckNotesIntent are there any notes for {Name}
+CheckNotesIntent what are {Name} notes
+CheckNotesIntent check notes for {Name}
+CheckNotesIntent check if there are any notes for {Name}
+CheckNotesIntent {Name} notes
+CheckNotesIntent play {Name} notes
+CheckNotesIntent for any notes for {Name}
+CheckNotesIntent if there are any notes for {Name}
+CaptureNameIntent {Name}
+ReplayIntent replay
+ReplayIntent play again
+ReplayIntent repeat them
+ReplayIntent repeat my notes
+ReplayIntent say that again
+ReplayIntent what was that
+ReplayIntent can you play them again
+DeleteIntent delete them
+DeleteIntent delete my notes
+DeleteIntent get rid of them
+DeleteIntent discard them
+DeleteIntent delete the notes for {Name}
+DeleteIntent delete {Name} notes
