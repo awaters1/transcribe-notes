@@ -9,12 +9,9 @@
                 },
                 {
                     "name": "Note",
-                    "type": "AMAZON.Literal"
+                    "type": "AMAZON.LITERAL"
                 }
             ]
-        },
-        {
-            "intent": "QuizIntent"
         },
         {
             "intent": "AMAZON.StopIntent"

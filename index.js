@@ -5,7 +5,7 @@ var Alexa = require('alexa-sdk');
 exports.handler = function (event, context, callback) {
     var alexa = Alexa.handler(event, context);
     if ('undefined' === typeof process.env.DEBUG) {
-        alexa.appId = 'insert app id here';
+        alexa.appId = 'amzn1.ask.skill.3cb3668d-9e8c-4c3f-8e6c-fc4bd8f7a84f';
     }
     console.log(event.session);
     console.log('Is session new:' + (event.session['new'] == true));
