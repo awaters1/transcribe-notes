@@ -8,6 +8,7 @@ exports.handler = function (event, context, callback) {
     if ('undefined' === typeof process.env.DEBUG) {
         alexa.appId = 'amzn1.ask.skill.3cb3668d-9e8c-4c3f-8e6c-fc4bd8f7a84f';
     }
+    console.log(JSON.stringify(event));
     alexa.dynamoDBTableName = 'transcribe-notes';
     alexa.registerHandlers(newSessionHandlers, startModeHandlers, startListenModeHandlers, transcribeHandlers, listenHandlers);
     alexa.execute();
@@ -29,7 +30,6 @@ var newSessionHandlers = {
             console.log('New session intent request', intentName);
             if (intentName == 'TranscribeNoteIntent') {
                 this.handler.state = states.TRANSCRIBE_MODE;
-
             } else if (intentName == 'CheckNotesIntent') {
                 this.handler.state = states.LISTEN_MODE;
             } else if (intentName == 'DeleteIntent') {
@@ -55,15 +55,6 @@ var newSessionHandlers = {
     'CaptureNameIntent': function() {
         // TODO: We should save the name and then ask if they want to transcribe or listen
     },
-    'AMAZON.StopIntent': function () {
-        this.emit(':tell', "Goodbye!");
-    },
-    'AMAZON.CancelIntent': function () {
-        this.emit(':tell', "Goodbye!");
-    },
-    'TestIntent': function() {
-        this.emit(':tell', "Testing123");
-    },
     'SessionEndedRequest': function () {
         console.log('session ended!');
         this.emit(":tell", "Goodbye!");
@@ -72,7 +63,6 @@ var newSessionHandlers = {
 
 var startModeHandlers = Alexa.CreateStateHandler(states.START_MODE, {
     'NewSession': function () {
-        console.log('New Session Start Mode');
         this.handler.state = '';
         this.emitWithState('NewSession');
     },
@@ -92,20 +82,12 @@ var startModeHandlers = Alexa.CreateStateHandler(states.START_MODE, {
     },
     'AMAZON.YesIntent': function () {
         this.handler.state = states.TRANSCRIBE_MODE;
-        this.emitWithState('TranscribeNoteIntent');
+        this.emit(':ask', 'Ok, who is this note for?');
     },
     'AMAZON.NoIntent': function () {
         console.log("NOINTENT");
         this.handler.state = states.START_LISTEN_MODE;
         this.emit(':ask', 'Ok, do you want to listen to previously transcribed notes?');
-    },
-    "AMAZON.StopIntent": function () {
-        console.log("STOPINTENT");
-        this.emit(':tell', "Goodbye!");
-    },
-    "AMAZON.CancelIntent": function () {
-        console.log("CANCELINTENT");
-        this.emit(':tell', "Goodbye!");
     },
     'SessionEndedRequest': function () {
         console.log("SESSIONENDEDREQUEST");
@@ -130,19 +112,11 @@ var startListenModeHandlers = Alexa.CreateStateHandler(states.START_LISTEN_MODE,
     },
     'AMAZON.YesIntent': function () {
         this.handler.state = states.LISTEN_MODE;
-        this.emit(':ask', 'Ok, who is this note for?');
+        this.emit(':ask', 'Ok, what is your name?');
     },
     'AMAZON.NoIntent': function () {
         console.log("NOINTENT");
         this.emit(':tell', 'Ok, talk to you later!');
-    },
-    "AMAZON.StopIntent": function () {
-        console.log("STOPINTENT");
-        this.emit(':tell', "Goodbye!");
-    },
-    "AMAZON.CancelIntent": function () {
-        console.log("CANCELINTENT");
-        this.emit(':tell', "Goodbye!");
     },
     'SessionEndedRequest': function () {
         console.log("SESSIONENDEDREQUEST");
@@ -162,12 +136,12 @@ var transcribeHandlers = Alexa.CreateStateHandler(states.TRANSCRIBE_MODE, {
         this.emitWithState('NewSession');
     },
     'TranscribeNoteIntent': function() {
-        var nameSlot = this.event.request.intent.slots.Name;
+        var nameSlot = this.event.request.intent.slots ? this.event.request.intent.slots.Name : undefined;
         var hasNameSlot = (nameSlot && nameSlot.value);
         if (hasNameSlot) {
             this.attributes.name = nameSlot.value;
         }
-        var noteSlot = this.event.request.intent.slots.Note;
+        var noteSlot = this.event.request.intent.slots? this.event.request.intent.slots.Note : undefined;
         var hasNoteSlot = (noteSlot && noteSlot.value);
         if (hasNoteSlot) {
             this.attributes.note = noteSlot.value;
@@ -202,14 +176,6 @@ var transcribeHandlers = Alexa.CreateStateHandler(states.TRANSCRIBE_MODE, {
     'AMAZON.HelpIntent': function () {
         this.handler.state = '';
         this.emitWithState('AMAZON.HelpIntent');
-    },
-    "AMAZON.StopIntent": function () {
-        console.log("STOPINTENT");
-        this.emit(':tell', "Goodbye!");
-    },
-    "AMAZON.CancelIntent": function () {
-        console.log("CANCELINTENT");
-        this.emit(':tell', "Goodbye!");
     },
     'SessionEndedRequest': function () {
         console.log("SESSIONENDEDREQUEST");
@@ -256,7 +222,9 @@ var listenHandlers = Alexa.CreateStateHandler(states.LISTEN_MODE, {
                     textToSpeak += note.note + '<break time="1s" />';
                     ++notesForUser;
                 } else {
-                    otherNames.push(note.name);
+                    if (otherNames.indexOf(note.name) == -1){
+                        otherNames.push(note.name);
+                    }
                 }
                 ++otherNotes;
             }
@@ -266,7 +234,7 @@ var listenHandlers = Alexa.CreateStateHandler(states.LISTEN_MODE, {
              ' Should I replay the notes or delete them?');
         } else if (otherNotes > 0) {
             var otherNamesSpeek = otherNames.join(', ');
-            this.emit(':tell', 'No notes found for ' + name + ' but there are ' + otherNotes + ' for ' +
+            this.emit(':tell', 'No notes found for ' + name + ' but there are ' + otherNotes + ' other notes for ' +
                 otherNamesSpeek);
         } else {
             this.emit(':tell', 'There are no notes for ' + name);
@@ -332,23 +300,14 @@ var listenHandlers = Alexa.CreateStateHandler(states.LISTEN_MODE, {
         console.log("NOINTENT");
         this.emit(':tell', 'Ok, see you next time!');
     },
-    "AMAZON.StopIntent": function () {
-        console.log("STOPINTENT");
-        this.emit(':tell', "Goodbye!");
-    },
-    "AMAZON.CancelIntent": function () {
-        console.log("CANCELINTENT");
-        this.emit(':tell', "Goodbye!");
-    },
     'SessionEndedRequest': function () {
         console.log("SESSIONENDEDREQUEST");
         //this.attributes['endedSessionCount'] += 1;
         this.emit(':tell', "Goodbye!");
     },
     'Unhandled': function () {
-        // TODO:
         console.log("UNHANDLED");
-        var message = 'Say yes to continue, or no to end the game.';
-        this.emit(':ask', message, message);
+        this.handler.state = '';
+        this.emitWithState('NewSession');
     }
 });
