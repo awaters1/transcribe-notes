@@ -7,6 +7,7 @@ exports.handler = function (event, context, callback) {
     if ('undefined' === typeof process.env.DEBUG) {
         alexa.appId = 'amzn1.ask.skill.3cb3668d-9e8c-4c3f-8e6c-fc4bd8f7a84f';
     }
+    alexa.dynamoDBTableName = 'transcribe-notes';
     alexa.registerHandlers(newSessionHandlers, startTranscribeModeHandlers, startListenModeHandlers, transcribeHandlers, listenHandlers);
     alexa.execute();
 };
@@ -142,7 +143,7 @@ var transcribeHandlers = Alexa.CreateStateHandler(states.TRANSCRIBE_MODE, {
         if (hasNoteSlot) {
             this.attributes.note = noteSlot.value;
         }
-        
+
         var hasName = hasNameSlot || (this.attributes.name);
         if (!hasName) {
             this.emit(':ask', 'Ok, who is this note for?', 'Who is the note for?');
