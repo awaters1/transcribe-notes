@@ -7,10 +7,6 @@ exports.handler = function (event, context, callback) {
     if ('undefined' === typeof process.env.DEBUG) {
         alexa.appId = 'amzn1.ask.skill.3cb3668d-9e8c-4c3f-8e6c-fc4bd8f7a84f';
     }
-    console.log(event.session);
-    console.log('Is session new:' + (event.session['new'] == true));
-    console.log(event.session['new']);
-    console.log(typeof(event.session['new']));
     alexa.registerHandlers(newSessionHandlers, startTranscribeModeHandlers, startListenModeHandlers, transcribeHandlers, listenHandlers);
     alexa.execute();
 };
@@ -30,9 +26,9 @@ var newSessionHandlers = {
         this.emit(':ask', 'What do you want to do? Transcribe a note or check for notes?',
             'Transcribe a note or check for notes?');
     },
-    'TranscribeNoteForNameIntent': function() {
+    'TranscribeNoteIntent': function() {
         this.handler.state = states.TRANSCRIBE_MODE;
-        this.emitWithState('TranscribeNoteForNameIntent');
+        this.emitWithState('TranscribeNoteIntent');
     },
     'AMAZON.StopIntent': function () {
         this.emit(':tell', "Goodbye!");
@@ -136,28 +132,27 @@ var transcribeHandlers = Alexa.CreateStateHandler(states.TRANSCRIBE_MODE, {
         this.emitWithState('NewSession');
     },
     'TranscribeNoteIntent': function() {
-        var nameSlot = this.event.request.intent.slots.name;
+        var nameSlot = this.event.request.intent.slots.Name;
         var hasNameSlot = (nameSlot && nameSlot.value);
+        if (hasNameSlot) {
+            this.attributes.name = nameSlot.value;
+        }
+        var noteSlot = this.event.request.intent.slots.Note;
+        var hasNoteSlot = (noteSlot && noteSlot.value);
+        if (hasNoteSlot) {
+            this.attributes.note = noteSlot.value;
+        }
+        
         var hasName = hasNameSlot || (this.attributes.name);
         if (!hasName) {
             this.emit(':ask', 'Ok, who is this note for?', 'Who is the note for?');
-        } else if (hasNameSlot) {
-            this.attributes.name = nameSlot.value;
         }
-        var noteSlot = this.event.request.intent.slots.note;
-        var hasNoteSlot = (noteSlot && noteSlot.value);
         var hasNote = hasNoteSlot || (this.attributes.note);
         if (!hasNote) {
             this.emit(':ask', 'Ok, what note do you want to leave for ' + this.attributes.name + '?', 'What is the note?');
-        } else if (hasNoteSlot) {
-            this.attributes.note = noteSlot.value;
         }
-        // TODO: Save the note
-    },
-    'TranscribeNoteForNameIntent': function() {
-        var name = value;
-        this.attributes['name'] = name;
-        this.emit(':ask', 'What is the note for ' + name + '?', 'Tell me the note');
+        console.log('Leave note "' + this.attributes.note + '" for "' + this.attributes.name + '"');
+        this.emit(':tell', 'Ok, we left the note');
     },
     'AMAZON.HelpIntent': function () {
         this.handler.state = '';
@@ -177,8 +172,9 @@ var transcribeHandlers = Alexa.CreateStateHandler(states.TRANSCRIBE_MODE, {
         this.emit(':tell', "Goodbye!");
     },
     'Unhandled': function () {
+        // TODO: Maybe able to send this to transcribe note intent
         console.log("UNHANDLED");
-        var message = 'Say yes to continue, or no to end the game.';
+        var message = 'Not sure';
         this.emit(':ask', message, message);
     }
 });
